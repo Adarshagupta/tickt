@@ -210,5 +210,3 @@ export function SubEventClient({ subEvent, isOrganizer }: SubEventClientProps) {
     </div>
   )
 } 
-} 
-} 
