@@ -42,7 +42,7 @@ export default async function TicketsPage() {
       <div className="divide-y divide-gray-200 rounded-lg border bg-white">
         {tickets.length === 0 ? (
           <div className="p-4 text-center text-sm text-gray-500">
-            You don't have any tickets yet.{" "}
+            You haven&apos;t purchased any tickets yet.{" "}
             <Link href="/dashboard/events" className="text-indigo-600 hover:text-indigo-500">
               Browse events
             </Link>

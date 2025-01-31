@@ -3,10 +3,16 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import type { SubEvent, Ticket } from ".prisma/client"
 
 interface SubEventClientProps {
-  subEvent: SubEvent & {
+  subEvent: {
+    id: string
+    title: string
+    description: string
+    startDate: Date
+    endDate: Date
+    venue: string
+    status: string
     mainEvent: {
       id: string
       title: string
@@ -14,7 +20,10 @@ interface SubEventClientProps {
         name: string
       }
     }
-    registrations: Ticket[]
+    registrations: Array<{
+      id: string
+      status: string
+    }>
   }
   isOrganizer: boolean
 }
@@ -197,48 +206,9 @@ export function SubEventClient({ subEvent, isOrganizer }: SubEventClientProps) {
             </div>
           )}
         </div>
-
-        <div className="space-y-4">
-          <div>
-            <h2 className="text-lg font-medium">Ticket Information</h2>
-            <div className="mt-4 rounded-lg border bg-white p-6">
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Price</h3>
-                  <p className="mt-1 text-2xl font-semibold">
-                    ${subEvent.price.toFixed(2)}
-                  </p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Capacity</h3>
-                  <p className="mt-1">{subEvent.capacity} attendees</p>
-                </div>
-
-                <div>
-                  <h3 className="text-sm font-medium text-gray-500">Event Type</h3>
-                  <p className="mt-1">{subEvent.eventType}</p>
-                </div>
-
-                {!isOrganizer && subEvent.status === "PUBLISHED" && (
-                  <button
-                    type="button"
-                    disabled={isRegistering || isRegistered}
-                    onClick={registerForSubEvent}
-                    className="mt-4 w-full rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isRegistered 
-                      ? "Already Registered" 
-                      : isRegistering 
-                        ? "Registering..." 
-                        : "Purchase Ticket"}
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
+} 
+} 
 } 

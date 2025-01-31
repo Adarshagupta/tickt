@@ -47,14 +47,13 @@ export default function EditEventPage({ params }: EditEventPageProps) {
     setIsLoading(true)
     setError(null)
 
-    const formData = new FormData(e.currentTarget)
-    const data = {
-      title: formData.get("title") as string,
-      description: formData.get("description") as string,
-      startDate: formData.get("startDate") as string,
-      endDate: formData.get("endDate") as string,
-      venue: formData.get("venue") as string,
-    }
+    const formData = Object.fromEntries(
+      Array.from(e.currentTarget.elements)
+        .filter((element): element is HTMLInputElement => 
+          element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement
+        )
+        .map(element => [element.name, element.value])
+    )
 
     try {
       const response = await fetch(`/api/events/${params.eventId}`, {
@@ -62,7 +61,7 @@ export default function EditEventPage({ params }: EditEventPageProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formData),
       })
 
       if (!response.ok) {

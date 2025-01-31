@@ -3,7 +3,6 @@ import { notFound } from "next/navigation"
 import { authOptions } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { SubEventClient } from "./client"
-import type { SubEvent, Ticket } from ".prisma/client"
 
 interface SubEventPageProps {
   params: {

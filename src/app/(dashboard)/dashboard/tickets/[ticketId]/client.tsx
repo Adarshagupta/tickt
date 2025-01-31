@@ -69,17 +69,4 @@ export function QRCodeGenerator({
       <div id="qrcode" className="w-64 h-64" />
     </div>
   )
-}
-
-// Simple checksum function to verify data integrity
-function generateChecksum(...values: string[]): string {
-  return values.reduce((acc, val) => {
-    let hash = 0
-    for (let i = 0; i < val.length; i++) {
-      const char = val.charCodeAt(i)
-      hash = ((hash << 5) - hash) + char
-      hash = hash & hash
-    }
-    return acc + hash.toString(16)
-  }, "")
 } 
