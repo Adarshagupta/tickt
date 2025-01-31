@@ -3,12 +3,17 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useSession } from "next-auth/react"
+import Link from "next/link"
 
 export default function CreateEventPage() {
   const router = useRouter()
   const { data: session } = useSession()
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+
+  if (!session?.user) {
+    return null
+  }
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -44,6 +49,7 @@ export default function CreateEventPage() {
 
       const { event } = await response.json()
       router.push(`/dashboard/events/${event.id}`)
+      router.refresh()
     } catch (error) {
       if (error instanceof Error) {
         setError(error.message)
@@ -53,10 +59,6 @@ export default function CreateEventPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  if (!session?.user) {
-    return null
   }
 
   return (
@@ -146,13 +148,12 @@ export default function CreateEventPage() {
           </div>
 
           <div className="flex justify-end space-x-4">
-            <button
-              type="button"
-              onClick={() => router.back()}
+            <Link
+              href="/dashboard/events"
               className="rounded-md border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
             >
               Cancel
-            </button>
+            </Link>
             <button
               type="submit"
               disabled={isLoading}

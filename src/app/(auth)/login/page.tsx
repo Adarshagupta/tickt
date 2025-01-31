@@ -8,12 +8,14 @@ import { useSession } from "next-auth/react"
 
 export default function LoginPage() {
   const router = useRouter()
-  const { data: session, status } = useSession()
+  const { status } = useSession()
   const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setIsLoading(true)
+    setError(null)
 
     const formData = new FormData(event.currentTarget)
     const email = formData.get("email") as string
@@ -27,13 +29,14 @@ export default function LoginPage() {
       })
 
       if (result?.error) {
+        setError(result.error)
         return
       }
 
       router.push("/dashboard")
       router.refresh()
-    } catch (error) {
-      // Handle error
+    } catch (err) {
+      setError("An unexpected error occurred")
     } finally {
       setIsLoading(false)
     }
@@ -50,6 +53,12 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={onSubmit} className="mt-8 space-y-6">
+          {error && (
+            <div className="rounded-md bg-red-50 p-4 text-sm text-red-500">
+              {error}
+            </div>
+          )}
+
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium">

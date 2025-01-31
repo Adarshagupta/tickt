@@ -117,7 +117,7 @@ export default async function VerifyPage({ params }: VerifyPageProps) {
         </div>
       </div>
     )
-  } catch (error) {
+  } catch {
     notFound()
   }
 } 

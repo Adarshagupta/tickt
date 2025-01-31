@@ -58,7 +58,7 @@ export default async function EventsPage() {
       {isOrganizer && (
         <div className="space-y-6">
           <div>
-            <h2 className="text-lg font-semibold mb-4">Your Organization's Events</h2>
+            <h2 className="text-lg font-semibold mb-4">Your Organization&apos;s Events</h2>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {userOrgs.map((membership) =>
                 membership.organization.mainEvents.map((event) => (
