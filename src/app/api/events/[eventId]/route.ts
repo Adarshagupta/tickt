@@ -12,20 +12,14 @@ const eventSchema = z.object({
   venue: z.string().min(1, "Venue is required"),
 })
 
-const routeContextSchema = z.object({
-  params: z.object({
-    eventId: z.string().min(1),
-  }),
-})
-
 export async function GET(
   request: Request,
-  context: z.infer<typeof routeContextSchema>
+  context: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    // Validate the route context
-    const { params } = routeContextSchema.parse(context)
-    
+    // Await the params
+    const { eventId } = await context.params;
+
     // Get session
     const session = await getServerSession(authOptions)
     if (!session?.user) {
@@ -37,7 +31,7 @@ export async function GET(
 
     // Get event with organization details
     const event = await db.mainEvent.findUnique({
-      where: { id: params.eventId },
+      where: { id: eventId },
       include: {
         organization: {
           include: {
@@ -71,12 +65,6 @@ export async function GET(
     return NextResponse.json({ data: event })
   } catch (error) {
     console.error("[EVENT_GET]", error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Invalid request parameters" },
-        { status: 422 }
-      )
-    }
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
@@ -86,11 +74,11 @@ export async function GET(
 
 export async function PATCH(
   request: Request,
-  context: z.infer<typeof routeContextSchema>
+  context: { params: Promise<{ eventId: string }> }
 ) {
   try {
-    // Validate the route context
-    const { params } = routeContextSchema.parse(context)
+    // Await the params
+    const { eventId } = await context.params;
 
     // Get session
     const session = await getServerSession(authOptions)
@@ -103,7 +91,7 @@ export async function PATCH(
 
     // Get event with organization details
     const event = await db.mainEvent.findUnique({
-      where: { id: params.eventId },
+      where: { id: eventId },
       include: {
         organization: {
           include: {
@@ -136,31 +124,36 @@ export async function PATCH(
 
     // Parse and validate request body
     const body = await request.json().catch(() => ({}))
-    const validatedData = eventSchema.parse(body)
+    
+    try {
+      const validatedData = eventSchema.parse(body)
 
-    // Validate end date is after start date
-    if (validatedData.endDate <= validatedData.startDate) {
-      return NextResponse.json(
-        { error: "End date must be after start date" },
-        { status: 400 }
-      )
+      // Validate end date is after start date
+      if (validatedData.endDate <= validatedData.startDate) {
+        return NextResponse.json(
+          { error: "End date must be after start date" },
+          { status: 400 }
+        )
+      }
+
+      // Update event
+      const updatedEvent = await db.mainEvent.update({
+        where: { id: eventId },
+        data: validatedData,
+      })
+
+      return NextResponse.json({ data: updatedEvent })
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: validationError.errors[0].message },
+          { status: 422 }
+        )
+      }
+      throw validationError
     }
-
-    // Update event
-    const updatedEvent = await db.mainEvent.update({
-      where: { id: params.eventId },
-      data: validatedData,
-    })
-
-    return NextResponse.json({ data: updatedEvent })
   } catch (error) {
     console.error("[EVENT_PATCH]", error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: error.errors[0].message },
-        { status: 422 }
-      )
-    }
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }

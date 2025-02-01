@@ -1,23 +1,13 @@
 import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
-import { z } from "zod"
 import { db } from "@/lib/db"
 import { authOptions } from "@/lib/auth"
 
-const routeContextSchema = z.object({
-  params: z.object({
-    eventId: z.string().min(1),
-  }),
-})
-
 export async function POST(
   request: Request,
-  context: z.infer<typeof routeContextSchema>
+  { params }: { params: { eventId: string } }
 ) {
   try {
-    // Validate the route context
-    const { params } = routeContextSchema.parse(context)
-
     // Get session
     const session = await getServerSession(authOptions)
     if (!session?.user) {
@@ -112,12 +102,6 @@ export async function POST(
     }
   } catch (error) {
     console.error("[EVENT_REGISTER]", error)
-    if (error instanceof z.ZodError) {
-      return NextResponse.json(
-        { error: "Invalid request parameters" },
-        { status: 422 }
-      )
-    }
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
