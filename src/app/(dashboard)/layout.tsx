@@ -15,58 +15,66 @@ export default async function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen bg-gray-50">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute right-0 top-0 w-96 h-96 -translate-y-1/2 translate-x-1/2">
+          <div className="absolute inset-0 rotate-45 transform opacity-20">
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-indigo-500 blur-3xl" />
+          </div>
+        </div>
+        <div className="absolute left-0 bottom-0 w-96 h-96 translate-y-1/2 -translate-x-1/2">
+          <div className="absolute inset-0 -rotate-45 transform opacity-20">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 blur-3xl" />
+          </div>
+        </div>
+      </div>
+      
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 justify-between">
-            <div className="flex">
-              <div className="flex flex-shrink-0 items-center">
-                <Link href="/dashboard" className="text-xl font-bold text-indigo-600">
-                  Ticketing
-                </Link>
-              </div>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Link href="/dashboard" className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-violet-600 bg-clip-text text-transparent">
+                Ticketing
+              </Link>
+              <div className="hidden md:flex md:items-center md:space-x-6 ml-8">
                 <Link
                   href="/dashboard"
-                  className="inline-flex items-center border-b-2 border-indigo-500 px-1 pt-1 text-sm font-medium text-gray-900"
+                  className="px-3 py-2 text-sm font-medium text-indigo-950 hover:text-indigo-600 transition-colors"
                 >
                   Dashboard
                 </Link>
                 <Link
                   href="/dashboard/events"
-                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  className="px-3 py-2 text-sm font-medium text-indigo-950 hover:text-indigo-600 transition-colors"
                 >
                   Events
                 </Link>
                 <Link
                   href="/dashboard/tickets"
-                  className="inline-flex items-center border-b-2 border-transparent px-1 pt-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                  className="px-3 py-2 text-sm font-medium text-indigo-950 hover:text-indigo-600 transition-colors"
                 >
                   My Tickets
                 </Link>
               </div>
             </div>
-            <div className="hidden sm:ml-6 sm:flex sm:items-center">
-              <div className="relative ml-3">
-                <div className="flex items-center">
-                  <span className="text-sm text-gray-500">
-                    {session.user.email}
-                  </span>
-                  <Link
-                    href="/api/auth/signout"
-                    className="ml-4 text-sm text-gray-500 hover:text-gray-700"
-                  >
-                    Sign out
-                  </Link>
-                </div>
-              </div>
+            <div className="flex items-center space-x-4">
+              <span className="text-sm text-indigo-950">
+                {session.user.email}
+              </span>
+              <div className="h-4 w-px bg-gray-200" />
+              <Link
+                href="/api/auth/signout"
+                className="text-sm font-medium text-indigo-950 hover:text-indigo-600 transition-colors"
+              >
+                Sign out
+              </Link>
             </div>
           </div>
         </div>
       </nav>
 
-      <main>
-        <div className="mx-auto max-w-7xl py-6 sm:px-6 lg:px-8">
+      <main className="relative pt-16">
+        <div className="mx-auto max-w-7xl p-6 sm:p-8">
           {children}
         </div>
       </main>

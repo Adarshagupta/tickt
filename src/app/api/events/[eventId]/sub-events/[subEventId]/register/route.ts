@@ -2,6 +2,7 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { db } from "@/lib/db"
 import { authOptions } from "@/lib/auth"
+import type { Prisma } from "@prisma/client"
 
 export async function POST(
   req: Request,
@@ -83,6 +84,10 @@ export async function POST(
     // Generate a unique ticket number
     const ticketNumber = `${subEventId}-${session.user.id}-${Date.now()}`
 
+    // Get attendee details from request body
+    const body = await req.json()
+    const { attendeeName, attendeeDob, attendeeGovId, attendeeGovIdType } = body
+
     // Create registration
     const registration = await db.ticket.create({
       data: {
@@ -90,7 +95,11 @@ export async function POST(
         subEventId: subEventId,
         status: "CONFIRMED",
         ticketNumber,
-        price: subEvent.price
+        price: subEvent.price,
+        attendeeName,
+        attendeeDob: attendeeDob ? new Date(attendeeDob) : null,
+        attendeeGovId,
+        attendeeGovIdType: attendeeGovIdType,
       },
     })
 

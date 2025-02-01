@@ -94,10 +94,11 @@ model MainEvent {
   description     String
   startDate       DateTime
   endDate         DateTime
-  venue           String?
+  venue           String
   bannerImage     String?
   organizationId  String
   status          EventStatus @default(DRAFT)
+  imageUrl        String?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
@@ -113,11 +114,12 @@ model SubEvent {
   description  String
   startDate    DateTime
   endDate      DateTime
-  venue        String?
+  venue        String
   capacity     Int?
   eventType    EventType   @default(GENERAL)
   price        Float       @default(0)
   status       EventStatus @default(DRAFT)
+  imageUrl     String?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
 
@@ -167,6 +169,10 @@ model Ticket {
   checkedInAt  DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+  attendeeName String?
+  attendeeDob  DateTime?
+  attendeeGovId String?
+  attendeeGovIdType GovIdType?
 
   // Relations
   subEvent     SubEvent     @relation(fields: [subEventId], references: [id])
@@ -208,4 +214,11 @@ enum TicketStatus {
   CONFIRMED
   CANCELLED
   REFUNDED
+}
+
+enum GovIdType {
+  PASSPORT
+  DRIVERS_LICENSE
+  NATIONAL_ID
+  OTHER
 }

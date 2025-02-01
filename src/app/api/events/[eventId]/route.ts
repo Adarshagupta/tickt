@@ -12,20 +12,30 @@ const eventSchema = z.object({
   venue: z.string().min(1, "Venue is required"),
 })
 
+const routeContextSchema = z.object({
+  params: z.object({
+    eventId: z.string().min(1),
+  }),
+})
+
 export async function GET(
-  req: Request,
-  { params }: { params: { eventId: string } }
+  request: Request,
+  context: z.infer<typeof routeContextSchema>
 ) {
   try {
+    // Validate the route context
+    const { params } = routeContextSchema.parse(context)
+    
+    // Get session
     const session = await getServerSession(authOptions)
-
     if (!session?.user) {
       return NextResponse.json(
-        { message: "Unauthorized" },
+        { error: "Unauthorized" },
         { status: 401 }
       )
     }
 
+    // Get event with organization details
     const event = await db.mainEvent.findUnique({
       where: { id: params.eventId },
       include: {
@@ -46,42 +56,52 @@ export async function GET(
 
     if (!event) {
       return NextResponse.json(
-        { message: "Event not found" },
+        { error: "Event not found" },
         { status: 404 }
       )
     }
 
     if (event.organization.members.length === 0) {
       return NextResponse.json(
-        { message: "You must be an organization admin to view this event" },
+        { error: "You must be an organization admin to view this event" },
         { status: 403 }
       )
     }
 
-    return NextResponse.json({ event })
+    return NextResponse.json({ data: event })
   } catch (error) {
     console.error("[EVENT_GET]", error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid request parameters" },
+        { status: 422 }
+      )
+    }
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { error: "Internal Server Error" },
       { status: 500 }
     )
   }
 }
 
 export async function PATCH(
-  req: Request,
-  { params }: { params: { eventId: string } }
+  request: Request,
+  context: z.infer<typeof routeContextSchema>
 ) {
   try {
-    const session = await getServerSession(authOptions)
+    // Validate the route context
+    const { params } = routeContextSchema.parse(context)
 
+    // Get session
+    const session = await getServerSession(authOptions)
     if (!session?.user) {
       return NextResponse.json(
-        { message: "Unauthorized" },
+        { error: "Unauthorized" },
         { status: 401 }
       )
     }
 
+    // Get event with organization details
     const event = await db.mainEvent.findUnique({
       where: { id: params.eventId },
       include: {
@@ -102,49 +122,47 @@ export async function PATCH(
 
     if (!event) {
       return NextResponse.json(
-        { message: "Event not found" },
+        { error: "Event not found" },
         { status: 404 }
       )
     }
 
     if (event.organization.members.length === 0) {
       return NextResponse.json(
-        { message: "You must be an organization admin to edit this event" },
+        { error: "You must be an organization admin to edit this event" },
         { status: 403 }
       )
     }
 
-    const body = await req.json()
-    const { title, description, startDate, endDate, venue } = eventSchema.parse(body)
+    // Parse and validate request body
+    const body = await request.json().catch(() => ({}))
+    const validatedData = eventSchema.parse(body)
 
     // Validate end date is after start date
-    if (endDate <= startDate) {
+    if (validatedData.endDate <= validatedData.startDate) {
       return NextResponse.json(
-        { message: "End date must be after start date" },
+        { error: "End date must be after start date" },
         { status: 400 }
       )
     }
 
+    // Update event
     const updatedEvent = await db.mainEvent.update({
       where: { id: params.eventId },
-      data: {
-        title,
-        description,
-        startDate,
-        endDate,
-        venue,
-      },
+      data: validatedData,
     })
 
-    return NextResponse.json({ event: updatedEvent })
+    return NextResponse.json({ data: updatedEvent })
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ message: error.errors[0].message }, { status: 400 })
-    }
-
     console.error("[EVENT_PATCH]", error)
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: error.errors[0].message },
+        { status: 422 }
+      )
+    }
     return NextResponse.json(
-      { message: "Internal Server Error" },
+      { error: "Internal Server Error" },
       { status: 500 }
     )
   }
